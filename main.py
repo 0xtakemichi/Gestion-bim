@@ -1,17 +1,20 @@
 import pdfplumber
 
-# Se define funcion Extraer texto y se le entrega un argumento
-def Extraer_Texto(filepath):
-    # with se utiliza para trabajar con un recursos que necesitan cer liberados o cerrados
-    # A la función open() del módulo pdfplumber, que se utiliza para abrir un archivo PDF. 
+def extraer_texto(filepath):
+    data = ""
     with pdfplumber.open(filepath) as pdf:
-        # Bucle que recorre las paginas
         for p_num,pagina in enumerate (pdf.pages,1):
-            # Se realiza la extraccion de datos de la pagina actual
-            print("->Pagina:", p_num,"<-")
-            data = pagina.extract_text()
+            data += pagina.extract_text()
             print(data)
-            
+    return data
 
 
-Extraer_Texto("20.09.21_Minuta_Observaciones_Etapa_1.1_complementaria.pdf")
+
+def write_text_to_txt(text, txt_path):
+    with open(txt_path, 'w') as file:
+        file.write(text)
+
+
+txt_path = "file_txt.txt"
+texto_extraido = extraer_texto("20.09.21_Minuta_Observaciones_Etapa_1.1_complementaria.pdf")
+write_text_to_txt(texto_extraido, txt_path)
