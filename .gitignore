@@ -1,0 +1,56 @@
+# Python-specific
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Output
+csv_files/
+
+# Environments
+.env
+venv/
+env/
+ENV/
+
+# Dependencies
+lib/
+libs/
+*.egg-info/
+pip-log.txt
+pip-delete-this-directory.txt
+htmlcov/
+.coverage
+.tox/
+.nox/
+.cache/
+*.log
+*.egg
+*.egg-info
+dist/
+build/
+*.manifest
+*.pyc
+*.pyo
+*.pyd
+*.cache
+*.idea
+*.DS_Store
+
+# Web-specific
+node_modules/
+dist/
+/build/
+
+# IDE-specific
+.vscode/
+.idea/
+
+# Compiled files
+*.pyc
+*.class
+*.jar
+
+# Temporary files
+*.swp
+*~
