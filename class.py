@@ -2,6 +2,7 @@ import os
 import csv
 import tkinter as tk
 from tkinter import messagebox, filedialog, N, S, E, W
+import threading
 
 class ObservationsForm(tk.Tk):
     def __init__(self, observaciones):
@@ -118,6 +119,7 @@ class ObservationsForm(tk.Tk):
 
     def clear_fields(self):
         self.title_var.set("")
+        self.description_entry.delete('1.0', tk.END)
         #self.type_var.set("")
         #self.priority_var.set("")
         #self.status_var.set("")
@@ -151,12 +153,15 @@ class ObservationsForm(tk.Tk):
 if __name__ == "__main__":
     from package.pdf_operations import extract_text, identify_observations
     app = ObservationsForm([])
-    pdf_file_path = app.selectpdffile()  # Permitir al usuario seleccionar el archivo PDF
-    if pdf_file_path:  # Asegurarse de que el usuario seleccionó un archivo
-        texto_extraido = extract_text(pdf_file_path)
-        observaciones = identify_observations(texto_extraido)
-        app.observaciones = observaciones
-        app.fill_first_observation()
-        app.mainloop()
-    else:
-        messagebox.showerror("Error", "No se seleccionó ningún archivo PDF.")
+    def load_pdf():
+        pdf_file_path = app.selectpdffile()  # Permitir al usuario seleccionar el archivo PDF
+        if pdf_file_path:  # Asegurarse de que el usuario seleccionó un archivo
+            texto_extraido = extract_text(pdf_file_path)
+            observaciones = identify_observations(texto_extraido)
+            app.observaciones = observaciones
+            app.fill_first_observation()
+        else:
+            messagebox.showerror("Error", "No se seleccionó ningún archivo PDF.")
+    # Ejecutar la carga del PDF en un hilo separado
+    threading.Thread(target=load_pdf).start()
+    app.mainloop()
