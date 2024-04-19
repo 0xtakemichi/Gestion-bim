@@ -1,7 +1,7 @@
 import os
 import csv
 import tkinter as tk
-from tkinter import messagebox, Tk, Text, N, S, E, W
+from tkinter import messagebox, filedialog, N, S, E, W
 
 class ObservationsForm(tk.Tk):
     def __init__(self, observaciones):
@@ -79,7 +79,8 @@ class ObservationsForm(tk.Tk):
 
         self.next_button = tk.Button(self.buttons_frame, text="Next", command=self.next_observation)
         self.next_button.grid(row=0, column=1, sticky=N+S+E+W)
-        self.fill_first_observation()
+        #self.fill_first_observation()
+        #self.selectpdffile()
 
     def fill_first_observation(self):
         self.fill_observation(self.observaciones[self.current_index])
@@ -130,6 +131,11 @@ class ObservationsForm(tk.Tk):
             messagebox.showinfo("Info", "All observations filled and saved to CSV.")
             self.destroy()
 
+    def selectpdffile(self):
+        filetypes = [('PDF files', '.pdf'), ('All files', '.*')]
+        filepath = filedialog.askopenfilename(title='Open a file', initialdir='/', filetypes=filetypes)
+        return filepath
+
     def save_to_csv(self):
         csv_folder = "csv_files"
         if not os.path.exists(csv_folder):
@@ -144,7 +150,13 @@ class ObservationsForm(tk.Tk):
 
 if __name__ == "__main__":
     from package.pdf_operations import extract_text, identify_observations
-    texto_extraido = extract_text("20.09.21_Minuta_Observaciones_Etapa_1.1_complementaria.pdf")
-    observaciones = identify_observations(texto_extraido)
-    app = ObservationsForm(observaciones)
-    app.mainloop()
+    app = ObservationsForm([])
+    pdf_file_path = app.selectpdffile()  # Permitir al usuario seleccionar el archivo PDF
+    if pdf_file_path:  # Asegurarse de que el usuario seleccionó un archivo
+        texto_extraido = extract_text(pdf_file_path)
+        observaciones = identify_observations(texto_extraido)
+        app.observaciones = observaciones
+        app.fill_first_observation()
+        app.mainloop()
+    else:
+        messagebox.showerror("Error", "No se seleccionó ningún archivo PDF.")
