@@ -1,7 +1,7 @@
 import os
 import csv
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, Tk, Text, N, S, E, W
 
 class ObservationsForm(tk.Tk):
     def __init__(self, observaciones):
@@ -29,39 +29,57 @@ class ObservationsForm(tk.Tk):
         self.label_label = tk.Label(self, text="Label:")
         self.label_label.grid(row=0, column=0, sticky="w")
         self.label_entry = tk.Entry(self, textvariable=self.label_var, state="readonly")
-        self.label_entry.grid(row=0, column=1)
+        self.label_entry.grid(row=0, column=1, sticky=N+S+E+W)
 
         self.title_label = tk.Label(self, text="Title:")
         self.title_label.grid(row=1, column=0, sticky="w")
         self.title_entry = tk.Entry(self, textvariable=self.title_var)
-        self.title_entry.grid(row=1, column=1)
+        self.title_entry.grid(row=1, column=1, sticky=N+S+E+W)
+
+        # self.description_label = tk.Label(self, text="Description:")
+        # self.description_label.grid(row=2, column=0, sticky="w")
+        # self.description_entry = tk.Entry(self,textvariable=self.description_var, width=50)
+        # self.description_entry.grid(row=2, column=1, columnspan=2)
 
         self.description_label = tk.Label(self, text="Description:")
         self.description_label.grid(row=2, column=0, sticky="w")
-        self.description_entry = tk.Entry(self,textvariable=self.description_var, width=50)
-        self.description_entry.grid(row=2, column=1, columnspan=2)
+        self.description_entry = tk.Text(self, width=50, height=10, wrap='word')
+        self.description_entry.grid(row=2, column=1, columnspan=2, sticky=N+S+E+W)
 
+        self.type_options = ["Comentario", "Error", "Consulta", "Solicitud","Remark","Sin Definir", "Choque", "Problema"]
         self.type_label = tk.Label(self, text="Type:")
         self.type_label.grid(row=3, column=0, sticky="w")
-        self.type_entry = tk.Entry(self, textvariable=self.type_var)
-        self.type_entry.grid(row=3, column=1)
+        self.type_entry = tk.OptionMenu(self, self.type_var, * self.type_options)
+        self.type_entry.grid(row=3, column=1, sticky=N+S+E+W)
 
+        # Crear una lista con las opciones
+        self.priority_options = ["Bajo", "Normal", "Alto", "Crítico"]
+        # Crear el menú desplegable
         self.priority_label = tk.Label(self, text="Priority:")
         self.priority_label.grid(row=4, column=0, sticky="w")
-        self.priority_entry = tk.Entry(self, textvariable=self.priority_var)
-        self.priority_entry.grid(row=4, column=1)
+        self.priority_menu = tk.OptionMenu(self, self.priority_var, * self.priority_options)
+        self.priority_menu.grid(row=4, column=1, sticky=N+S+E+W)
 
+        self.status_options = ["Nueva", "Cerrada", "Terminada", "En Progreso", "En Espera"]
         self.status_label = tk.Label(self, text="Status:")
         self.status_label.grid(row=5, column=0, sticky="w")
-        self.status_entry = tk.Entry(self, textvariable=self.status_var)
-        self.status_entry.grid(row=5, column=1)
+        self.status_entry = tk.OptionMenu(self, self.status_var, * self.status_options)
+        self.status_entry.grid(row=5, column=1, sticky=N+S+E+W)
 
-        self.fill_button = tk.Button(self, text="Fill", command=self.fill)
-        self.fill_button.grid(row=6, column=1)
+        # Crear un marco para los botones
+        self.buttons_frame = tk.Frame(self)
+        self.buttons_frame.grid(row=6, column=1, sticky=N+S+E+W)
 
-        self.next_button = tk.Button(self, text="Next", command=self.next_observation)
-        self.next_button.grid(row=6, column=2)
+        # Configurar las columnas del marco para que se expandan
+        self.buttons_frame.grid_columnconfigure(0, weight=1)
+        self.buttons_frame.grid_columnconfigure(1, weight=1)
 
+        # Colocar los botones en el marco
+        self.fill_button = tk.Button(self.buttons_frame, text="Fill", command=self.fill)
+        self.fill_button.grid(row=0, column=0, sticky=N+S+E+W)
+
+        self.next_button = tk.Button(self.buttons_frame, text="Next", command=self.next_observation)
+        self.next_button.grid(row=0, column=1, sticky=N+S+E+W)
         self.fill_first_observation()
 
     def fill_first_observation(self):
@@ -70,12 +88,17 @@ class ObservationsForm(tk.Tk):
     def fill_observation(self, observation):
         self.label_var.set(observation[0])
         self.title_var.set("")
-        self.description_var.set(observation[2])
-        # self.description_entry.delete('1.0', tk.END)  # Limpiar contenido previo
-        # self.description_entry.insert('1.0', observation[2])
-        self.type_var.set("")
-        self.priority_var.set("")
-        self.status_var.set("")
+        #self.description_var.set(observation[2])
+        self.description_entry.delete('1.0', tk.END)  # Limpiar contenido previo
+        self.description_entry.insert('1.0', observation[2])
+        self.type_var.set(self.type_options[0])
+        self.priority_var.set(self.priority_options[1])
+        self.status_var.set(self.status_options[0])
+
+        # Calcular la cantidad de líneas en el texto
+        num_lines = int(self.description_entry.index('end-1c').split('.')[0])
+        # Ajustar la altura del widget Text
+        self.description_entry.config(height=num_lines*1.8)
 
     def fill(self):
         if (title := self.title_var.get()) and (type := self.type_var.get()) and (priority := self.priority_var.get()) and (status := self.status_var.get()):
@@ -92,9 +115,9 @@ class ObservationsForm(tk.Tk):
 
     def clear_fields(self):
         self.title_var.set("")
-        self.type_var.set("")
-        self.priority_var.set("")
-        self.status_var.set("")
+        #self.type_var.set("")
+        #self.priority_var.set("")
+        #self.status_var.set("")
 
     def next_observation(self):
         self.current_index += 1
