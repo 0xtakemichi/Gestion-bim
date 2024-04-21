@@ -1,8 +1,7 @@
 import os
 import csv
 import tkinter as tk
-from tkinter import messagebox, filedialog, N, S, E, W
-import threading
+from tkinter import messagebox, Tk, Text, N, S, E, W
 
 class ObservationsForm(tk.Tk):
     def __init__(self, observaciones):
@@ -10,6 +9,7 @@ class ObservationsForm(tk.Tk):
         self.title("Llenar Observaciones")
         self.observaciones = observaciones
         self.current_index = 0
+        self.observation_counter = 1
         # Establecer el tamaño mínimo de la ventana
         self.minsize(600, 400)
 
@@ -80,14 +80,13 @@ class ObservationsForm(tk.Tk):
 
         self.next_button = tk.Button(self.buttons_frame, text="Next", command=self.next_observation)
         self.next_button.grid(row=0, column=1, sticky=N+S+E+W)
-        #self.fill_first_observation()
-        #self.selectpdffile()
+        self.fill_first_observation()
 
     def fill_first_observation(self):
         self.fill_observation(self.observaciones[self.current_index])
 
     def fill_observation(self, observation):
-        self.label_var.set(observation[0])
+        self.label_var.set(self.observation_counter)
         self.title_var.set("")
         #self.description_var.set(observation[2])
         self.description_entry.delete('1.0', tk.END)  # Limpiar contenido previo
@@ -105,14 +104,16 @@ class ObservationsForm(tk.Tk):
         if (title := self.title_var.get()) and (type := self.type_var.get()) and (priority := self.priority_var.get()) and (status := self.status_var.get()):
             observation = list(self.observaciones[self.current_index])
             description_text = self.description_entry.get('1.0',tk.END).strip()
-
+            #label = str(self.label_var.get()) + '.'
+            label = self.label_var.get()
+            observation[0] = label
             observation[1] = title
             observation[2] = description_text
             observation[3] = type
             observation[4] = priority
             observation[5] = status
             self.observaciones[self.current_index] = tuple(observation)
-            messagebox.showinfo("Info", "Saved")
+            #messagebox.showinfo("Info", "Saved")
             self.clear_fields()
         else:
             messagebox.showerror("Error", "All fields must be filled.")
@@ -126,17 +127,13 @@ class ObservationsForm(tk.Tk):
 
     def next_observation(self):
         self.current_index += 1
+        self.observation_counter += 1
         if self.current_index < len(self.observaciones):
             self.fill_observation(self.observaciones[self.current_index])
         else:
             self.save_to_csv()
             messagebox.showinfo("Info", "All observations filled and saved to CSV.")
             self.destroy()
-
-    def selectpdffile(self):
-        filetypes = [('PDF files', '.pdf'), ('All files', '.*')]
-        filepath = filedialog.askopenfilename(title='Open a file', initialdir='/', filetypes=filetypes)
-        return filepath
 
     def save_to_csv(self):
         csv_folder = "csv_files"
@@ -150,18 +147,13 @@ class ObservationsForm(tk.Tk):
             writer.writerow(["Label", "Title", "Description", "Type", "Priority", "Status"])
             writer.writerows(self.observaciones)
 
-if __name__ == "__main__":
-    from package.pdf_operations import extract_text, identify_observations
-    app = ObservationsForm([])
-    def load_pdf():
-        pdf_file_path = app.selectpdffile()  # Permitir al usuario seleccionar el archivo PDF
-        if pdf_file_path:  # Asegurarse de que el usuario seleccionó un archivo
-            texto_extraido = extract_text(pdf_file_path)
-            observaciones = identify_observations(texto_extraido)
-            app.observaciones = observaciones
-            app.fill_first_observation()
-        else:
-            messagebox.showerror("Error", "No se seleccionó ningún archivo PDF.")
-    # Ejecutar la carga del PDF en un hilo separado
-    threading.Thread(target=load_pdf).start()
+def main():
+    from package.pdf_operations import extract_text, identify_observations, select_pdf_file
+    filepdf = select_pdf_file()
+    texto_extraido = extract_text(filepdf)
+    observaciones = identify_observations(texto_extraido)
+    app = ObservationsForm(observaciones)
     app.mainloop()
+
+if __name__ == "__main__":
+    main()
