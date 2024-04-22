@@ -146,14 +146,3 @@ class ObservationsForm(tk.Tk):
             writer = csv.writer(csv_file)
             writer.writerow(["Label", "Title", "Description", "Type", "Priority", "Status"])
             writer.writerows(self.observaciones)
-
-def main():
-    from package.pdf_operations import extract_text, identify_observations, select_pdf_file
-    filepdf = select_pdf_file()
-    texto_extraido = extract_text(filepdf)
-    observaciones = identify_observations(texto_extraido)
-    app = ObservationsForm(observaciones)
-    app.mainloop()
-
-if __name__ == "__main__":
-    main()
