@@ -126,6 +126,7 @@ class ObservationsForm(tk.Tk):
         #self.status_var.set("")
 
     def next_observation(self):
+        self.fill()
         self.current_index += 1
         self.observation_counter += 1
         if self.current_index < len(self.observaciones):
@@ -137,12 +138,32 @@ class ObservationsForm(tk.Tk):
 
     def save_to_csv(self):
         csv_folder = "csv_files"
-        if not os.path.exists(csv_folder):
-            os.makedirs(csv_folder)
         csv_filename = "observaciones_filled.csv"
         csv_path = os.path.join(csv_folder, csv_filename)
-
-        with open(csv_path, 'w', newline='') as csv_file:
+        
+        # Comprobar si el archivo CSV existe
+        if os.path.exists(csv_path):
+            with open(csv_path, 'r', newline='') as csv_file:
+                reader = csv.reader(csv_file)
+                existing_labels = [row[0] for row in reader if row]  # Lista de todos los labels existentes
+                if existing_labels:
+                    last_label = max(map(int, existing_labels[1:]))  # Ignorar el encabezado y encontrar el último label
+                else:
+                    last_label = 0
+        else:
+            last_label = 0
+        
+        # Actualizar los labels de las observaciones con los nuevos valores
+        for i, observation in enumerate(self.observaciones):
+            self.observaciones[i] = (str(last_label + i + 1),) + observation[1:]
+        
+        # Crear el directorio si no existe
+        if not os.path.exists(csv_folder):
+            os.makedirs(csv_folder)
+        
+        # Guardar los datos en el archivo CSV
+        with open(csv_path, 'a', newline='') as csv_file:  # 'a' para añadir datos sin sobrescribir
             writer = csv.writer(csv_file)
-            writer.writerow(["Label", "Title", "Description", "Type", "Priority", "Status"])
+            if last_label == 0:  # Si es la primera vez, escribir el encabezado
+                writer.writerow(["Label", "Title", "Description", "Type", "Priority", "Status"])
             writer.writerows(self.observaciones)

@@ -1,6 +1,19 @@
 import os
 import csv
 
+#guardar csv funcion de la clase obsetvation_form
+def save_to_csv(self):
+    csv_folder = "csv_files"
+    if not os.path.exists(csv_folder):
+        os.makedirs(csv_folder)
+    csv_filename = "observaciones_filled.csv"
+    csv_path = os.path.join(csv_folder, csv_filename)
+
+    with open(csv_path, 'w', newline='') as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerow(["Label", "Title", "Description", "Type", "Priority", "Status"])
+        writer.writerows(self.observaciones)
+
 def export_text_to_csv(observaciones):
     # Define la carpeta donde se guardará el archivo CSV
     csv_folder = "csv_files"
@@ -18,9 +31,6 @@ def export_text_to_csv(observaciones):
 
         for enum, texto in observaciones:
             writer.writerow([enum, "" , texto, "", "", "", "", "", "", "", "", "", "", ""])
-
-
-
 
 import openpyxl
 def export_text_to_excel(observaciones, excel_path):
