@@ -15,6 +15,7 @@ def extract_texts(files):
             for page in pdf.pages:
                 page_text = page.extract_text()
                 if page_text:  # Asegurarse de que la página contenga texto
+                    page_text = re.sub(r'\n', ' ', page_text) # Eliminar saltos de linea
                     text += page_text
         all_texts.append(text)  # Agregar el texto de este archivo a la lista
     return all_texts
@@ -25,5 +26,5 @@ def identify_observations(textos):
     for texto in textos:  # Procesar cada texto individualmente
         coincidencias = re.findall(patron, texto, re.DOTALL)
         for match in coincidencias:
-            observaciones.append((match[0].strip(), "", match[1].strip(), "", "", ""))
+            observaciones.append((match[0].strip(), "", match[1].strip(), "", "", "", "", "", ""))
     return observaciones
