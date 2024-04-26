@@ -46,13 +46,15 @@ class ObservationsForm(tk.Tk):
         self.description_entry = tk.Text(self, width=50, height=10, wrap='word')
         self.description_entry.grid(row=2, column=1, columnspan=2, sticky=N+S+E+W)
 
-        self.type_options = ["Comentario", "Error", "Consulta", "Solicitud","Remark","Sin Definir", "Choque", "Problema"]
+        self.type_options = self.read_options_from_csv('csv_files/options_menu/TipoTareas.csv')
+        #self.type_options = ["Comentario", "Error", "Consulta", "Solicitud","Remark","Sin Definir", "Choque", "Problema"]
         self.type_label = tk.Label(self, text="Type:")
         self.type_label.grid(row=3, column=0, sticky="w")
         self.type_entry = tk.OptionMenu(self, self.type_var, * self.type_options)
         self.type_entry.grid(row=3, column=1, sticky=N+S+E+W)
 
         # Crear una lista con las opciones
+        #self.priority_options = self.read_options_from_csv('csv_files/PrioridadTareas.csv')
         self.priority_options = ["Bajo", "Normal", "Alto", "Crítico"]
         # Crear el menú desplegable
         self.priority_label = tk.Label(self, text="Priority:")
@@ -60,7 +62,8 @@ class ObservationsForm(tk.Tk):
         self.priority_menu = tk.OptionMenu(self, self.priority_var, * self.priority_options)
         self.priority_menu.grid(row=4, column=1, sticky=N+S+E+W)
 
-        self.status_options = ["Nueva", "Cerrada", "Terminada", "En Progreso", "En Espera"]
+        self.status_options = self.read_options_from_csv('csv_files/options_menu/EstadoTareas.csv')
+        #self.status_options = ["Nueva", "Cerrada", "Terminada", "En Progreso", "En Espera"]
         self.status_label = tk.Label(self, text="Status:")
         self.status_label.grid(row=5, column=0, sticky="w")
         self.status_entry = tk.OptionMenu(self, self.status_var, * self.status_options)
@@ -82,6 +85,23 @@ class ObservationsForm(tk.Tk):
         self.next_button.grid(row=0, column=1, sticky=N+S+E+W)
         self.fill_first_observation()
 
+    @staticmethod
+    def read_options_from_csv(csv_file_path):
+        """
+        Lee las opciones desde un archivo CSV y devuelve una lista con ellas.
+        Asume que cada opción está en su propia fila en la primera columna.
+        """
+        if not os.path.exists(csv_file_path):
+            messagebox.showerror("Error", f"El archivo {csv_file_path} no existe.")
+            return []
+
+        options = []
+        with open(csv_file_path, mode='r', newline='', encoding='utf-8') as csvfile:
+            reader = csv.reader(csvfile)
+            next(reader)  # Saltar el encabezado
+            options = [row[0] for row in reader if row]  # Asegúrate de que la fila no esté vacía
+        return options
+    
     def fill_first_observation(self):
         self.fill_observation(self.observaciones[self.current_index])
 
