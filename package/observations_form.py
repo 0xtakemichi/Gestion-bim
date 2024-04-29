@@ -1,14 +1,14 @@
-import os
-import csv
 import tkinter as tk
 from tkinter import messagebox, N, S, E, W
 from datetime import datetime
+from .csv_handler import CSVHandler
 
 class ObservationsForm(tk.Tk):
     def __init__(self, observaciones):
         super().__init__()
         self.title("Llenar Observaciones")
         self.observaciones = observaciones
+        self.csv_handler = CSVHandler('csv_files', 'observaciones_filled.csv')
         self.current_index = 0
         self.observation_counter = 1
         # Establecer el tamaño mínimo de la ventana
@@ -44,8 +44,9 @@ class ObservationsForm(tk.Tk):
         self.description_entry = tk.Text(self, width=50, height=10, wrap='word')
         self.description_entry.grid(row=2, column=1, columnspan=2, sticky=N+S+E+W)
 
-        self.type_options = self.read_options_from_csv('csv_files/options_menu/TipoTareas.csv')
+        #self.type_options = self.read_options_from_csv('csv_files/options_menu/TipoTareas.csv')
         #self.type_options = ["Comentario", "Error", "Consulta", "Solicitud","Remark","Sin Definir", "Choque", "Problema"]
+        self.type_options = self.csv_handler.read_options_from_csv('csv_files/options_menu/TipoTareas.csv')
         self.type_label = tk.Label(self, text="Type:")
         self.type_label.grid(row=3, column=0, sticky="w")
         self.type_entry = tk.OptionMenu(self, self.type_var, * self.type_options)
@@ -60,8 +61,9 @@ class ObservationsForm(tk.Tk):
         self.priority_menu = tk.OptionMenu(self, self.priority_var, * self.priority_options)
         self.priority_menu.grid(row=4, column=1, sticky=N+S+E+W)
 
-        self.status_options = self.read_options_from_csv('csv_files/options_menu/EstadoTareas.csv')
+        #self.status_options = self.read_options_from_csv('csv_files/options_menu/EstadoTareas.csv')
         #self.status_options = ["Nueva", "Cerrada", "Terminada", "En Progreso", "En Espera"]
+        self.status_options = self.csv_handler.read_options_from_csv('csv_files/options_menu/EstadoTareas.csv')
         self.status_label = tk.Label(self, text="Status:")
         self.status_label.grid(row=5, column=0, sticky="w")
         self.status_entry = tk.OptionMenu(self, self.status_var, * self.status_options)
@@ -94,23 +96,7 @@ class ObservationsForm(tk.Tk):
         self.next_button = tk.Button(self.buttons_frame, text="Next", command=self.next_observation)
         self.next_button.grid(row=0, column=1, sticky=N+S+E+W)
         self.fill_first_observation()
-    # Realizar lectura de los csv con las opciones que tendran los menu despleglables
-    @staticmethod
-    def read_options_from_csv(csv_file_path):
-        """
-        Lee las opciones desde un archivo CSV y devuelve una lista con ellas.
-        Asume que cada opción está en su propia fila en la primera columna.
-        """
-        if not os.path.exists(csv_file_path):
-            messagebox.showerror("Error", f"El archivo {csv_file_path} no existe.")
-            return []
 
-        options = []
-        with open(csv_file_path, mode='r', newline='', encoding='utf-8') as csvfile:
-            reader = csv.reader(csvfile)
-            next(reader)  # Saltar el encabezado
-            options = [row[0] for row in reader if row]  # Asegúrate de que la fila no esté vacía
-        return options
     # Calcular las lineas y el espacio que tendra el widget de description
     def calculate_num_lines_required(self, text_widget, text):
         self.update_idletasks()  # Asegura que la interfaz gráfica esté actualizada
@@ -165,7 +151,6 @@ class ObservationsForm(tk.Tk):
             observation[7] = tags
             observation[8] = time
             self.observaciones[self.current_index] = tuple(observation)
-            #messagebox.showinfo("Info", "Saved")
             self.clear_fields()
         else:
             messagebox.showerror("Error", "All fields must be filled.")
@@ -173,9 +158,6 @@ class ObservationsForm(tk.Tk):
     def clear_fields(self):
         self.title_var.set("")
         self.description_entry.delete('1.0', tk.END)
-        #self.type_var.set("")
-        #self.priority_var.set("")
-        #self.status_var.set("")
 
     def next_observation(self):
         self.fill()
@@ -189,33 +171,5 @@ class ObservationsForm(tk.Tk):
             self.destroy()
 
     def save_to_csv(self):
-        csv_folder = "csv_files"
-        csv_filename = "observaciones_filled.csv"
-        csv_path = os.path.join(csv_folder, csv_filename)
-        
-        # Comprobar si el archivo CSV existe
-        if os.path.exists(csv_path):
-            with open(csv_path, 'r', newline='') as csv_file:
-                reader = csv.reader(csv_file)
-                existing_labels = [row[0] for row in reader if row]  # Lista de todos los labels existentes
-                if existing_labels:
-                    last_label = max(map(int, existing_labels[1:]))  # Ignorar el encabezado y encontrar el último label
-                else:
-                    last_label = 0
-        else:
-            last_label = 0
-        
-        # Actualizar los labels de las observaciones con los nuevos valores
-        for i, observation in enumerate(self.observaciones):
-            self.observaciones[i] = (str(last_label + i + 1),) + observation[1:]
-        
-        # Crear el directorio si no existe
-        if not os.path.exists(csv_folder):
-            os.makedirs(csv_folder)
-        
-        # Guardar los datos en el archivo CSV
-        with open(csv_path, 'a', newline='') as csv_file:  # 'a' para añadir datos sin sobrescribir
-            writer = csv.writer(csv_file)
-            if last_label == 0:  # Si es la primera vez, escribir el encabezado
-                writer.writerow(["Label", "Title", "Description", "Type", "Priority", "Status", "Assignee(s)", "Tags", "Created on"])
-            writer.writerows(self.observaciones)
+        self.csv_handler.save_observations_to_csv(self.observaciones)
+        messagebox.showinfo("Info", "All observations filled and saved to CSV.")
