@@ -46,7 +46,7 @@ class ObservationsForm(tk.Tk):
 
         #self.type_options = self.read_options_from_csv('csv_files/options_menu/TipoTareas.csv')
         #self.type_options = ["Comentario", "Error", "Consulta", "Solicitud","Remark","Sin Definir", "Choque", "Problema"]
-        self.type_options = self.csv_handler.read_options_from_csv('csv_files/options_menu/TipoTareas.csv')
+        self.type_options = self.csv_handler.read_options_from_csv('csv_options/TipoTareas.csv')
         self.type_label = tk.Label(self, text="Type:")
         self.type_label.grid(row=3, column=0, sticky="w")
         self.type_entry = tk.OptionMenu(self, self.type_var, * self.type_options)
@@ -63,7 +63,7 @@ class ObservationsForm(tk.Tk):
 
         #self.status_options = self.read_options_from_csv('csv_files/options_menu/EstadoTareas.csv')
         #self.status_options = ["Nueva", "Cerrada", "Terminada", "En Progreso", "En Espera"]
-        self.status_options = self.csv_handler.read_options_from_csv('csv_files/options_menu/EstadoTareas.csv')
+        self.status_options = self.csv_handler.read_options_from_csv('csv_options/EstadoTareas.csv')
         self.status_label = tk.Label(self, text="Status:")
         self.status_label.grid(row=5, column=0, sticky="w")
         self.status_entry = tk.OptionMenu(self, self.status_var, * self.status_options)
